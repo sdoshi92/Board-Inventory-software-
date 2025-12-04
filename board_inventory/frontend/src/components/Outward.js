@@ -619,7 +619,7 @@ const Outward = ({ user, onLogout }) => {
                   </Button>
                   <Button 
                     data-testid="confirm-issue-button"
-                    onClick={issueDetails.type === 'request' ? confirmIssueFromRequest : confirmDirectIssue}
+                    onClick={issueDetails.type === 'request' || issueDetails.type === 'bulk-request' ? confirmIssueFromRequest : confirmDirectIssue}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Send className="h-4 w-4 mr-2" />
