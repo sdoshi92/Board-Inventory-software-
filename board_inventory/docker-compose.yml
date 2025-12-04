@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:4.4
+    container_name: board_mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - board_net
+
+  backend:
+    build:
+      context: /data/board_inventory/backend
+    container_name: board_backend
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/board_inventory
+      - DB_NAME=board_inventory
+    ports:
+      - "8100:8000"
+    networks:
+      - board_net
+
+  frontend:
+    build:
+      context: /data/board_inventory/frontend
+      args:
+        REACT_APP_API_URL: http://192.168.0.160:8100
+    container_name: board_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3100:80"
+    networks:
+      - board_net
+
+
+volumes:
+  mongo_data:
+
+networks:
+  board_net:
+    driver: bridge

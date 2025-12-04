@@ -1,0 +1,106 @@
+{
+  "summary": {
+    "total_tests": 16,
+    "passed_tests": 15,
+    "success_rate": 93.75,
+    "timestamp": "2025-10-11T08:31:41.093459"
+  },
+  "detailed_results": [
+    {
+      "test_name": "API Health Check",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:39.720358"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Login",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:39.987448"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Get Categories",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.024950"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Create Board 1",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.104074"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Create Board 2",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.146878"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Create Board 3",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.189307"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Create Bulk Request",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.241077"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Check User Permissions",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.284526"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Approve Bulk Request",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.330413"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Fetch Approved Bulk Requests",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.770993"
+    },
+    {
+      "test_name": "Bulk Outward Credentials - Issue Bulk Request",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.872410"
+    },
+    {
+      "test_name": "Bulk Outward Credentials Final Cleanup - Request 04230aa9-a37b-4e22-a99e-382e1424bb84",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.911625"
+    },
+    {
+      "test_name": "Bulk Outward Credentials Final Cleanup - Board b913500c-7ba3-4f62-b241-4e37cc459e81",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.948194"
+    },
+    {
+      "test_name": "Bulk Outward Credentials Final Cleanup - Board 14a1cf34-970a-4881-9ee7-eec863d3423f",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:40.982617"
+    },
+    {
+      "test_name": "Bulk Outward Credentials Final Cleanup - Board 4b9fd228-5f2d-4336-94e8-697838d3a26a",
+      "success": true,
+      "details": "Status: 200, Expected: 200",
+      "timestamp": "2025-10-11T08:31:41.018451"
+    },
+    {
+      "test_name": "User Registration",
+      "success": false,
+      "details": "Status: 422, Expected: 200, Error: [{'type': 'missing', 'loc': ['body', 'first_name'], 'msg': 'Field required', 'input': {'email': 'test_user_083141@example.com', 'password': 'TestPass123!'}, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}, {'type': 'missing', 'loc': ['body', 'last_name'], 'msg': 'Field required', 'input': {'email': 'test_user_083141@example.com', 'password': 'TestPass123!'}, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}, {'type': 'missing', 'loc': ['body', 'designation'], 'msg': 'Field required', 'input': {'email': 'test_user_083141@example.com', 'password': 'TestPass123!'}, 'url': 'https://errors.pydantic.dev/2.11/v/missing'}]",
+      "timestamp": "2025-10-11T08:31:41.092492"
+    }
+  ]
+}
