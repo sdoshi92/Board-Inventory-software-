@@ -123,10 +123,7 @@ const IssueRequests = ({ user, onLogout }) => {
     setBulkFormData({
       categories: [{ 
         category_id: '', 
-        mode: 'quantity',
-        quantity: 1,
-        selected_boards: [],
-        auto_select_preview: []
+        quantity: 1
       }],
       issued_to: '',
       project_number: '',
