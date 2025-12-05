@@ -297,22 +297,10 @@ const IssueRequests = ({ user, onLogout }) => {
     // Check availability for each category
     const unavailableCategories = [];
     for (const cat of validCategories) {
-      if (cat.mode === 'specific') {
-        // Check if selected boards are still available
-        const available = getAvailableBoards(cat.category_id);
-        const unavailable = cat.selected_boards.filter(selected => 
-          !available.some(avail => avail.id === selected.id)
-        );
-        if (unavailable.length > 0) {
-          const categoryName = getCategoryName(cat.category_id);
-          unavailableCategories.push(`${categoryName}: ${unavailable.length} selected boards no longer available`);
-        }
-      } else {
-        const available = getAvailableBoardCount(cat.category_id);
-        if (available < cat.quantity) {
-          const categoryName = getCategoryName(cat.category_id);
-          unavailableCategories.push(`${categoryName}: need ${cat.quantity}, available ${available}`);
-        }
+      const available = getAvailableBoardCount(cat.category_id);
+      if (available < cat.quantity) {
+        const categoryName = getCategoryName(cat.category_id);
+        unavailableCategories.push(`${categoryName}: need ${cat.quantity}, available ${available}`);
       }
     }
 
@@ -328,13 +316,10 @@ const IssueRequests = ({ user, onLogout }) => {
     }
 
     try {
-      // Convert to backend format
+      // Send only category_id and quantity - boards will be assigned during approval
       const categories = validCategories.map(cat => ({
         category_id: cat.category_id,
-        ...(cat.mode === 'specific' ? 
-          { serial_numbers: cat.selected_boards.map(b => b.serial_number) } : 
-          { quantity: cat.quantity }
-        )
+        quantity: cat.quantity
       }));
       
       const response = await axios.post(`${API}/issue-requests/bulk`, {
