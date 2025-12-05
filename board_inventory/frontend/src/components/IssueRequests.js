@@ -137,10 +137,7 @@ const IssueRequests = ({ user, onLogout }) => {
         ...bulkFormData,
         categories: [...bulkFormData.categories, { 
           category_id: '', 
-          mode: 'quantity',
-          quantity: 1,
-          selected_boards: [],
-          auto_select_preview: []
+          quantity: 1
         }]
       });
     }
