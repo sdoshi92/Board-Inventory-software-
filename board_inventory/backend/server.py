@@ -814,39 +814,78 @@ async def issue_board(
                 
                 for board_request in bulk_request_doc["boards"]:
                     try:
-                        # Find available board for this category/serial
-                        query = {
-                            "category_id": board_request["category_id"], 
-                            "$or": [
-                                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                                {"location": "Repairing", "condition": "Repaired"}
-                            ]
-                        }
+                        # Check if boards are already assigned (old format) or need assignment (new format)
                         if board_request.get("serial_number"):
-                            query["serial_number"] = board_request["serial_number"]
+                            # Old format: specific serial number already assigned
+                            query = {
+                                "category_id": board_request["category_id"],
+                                "serial_number": board_request["serial_number"],
+                                "$or": [
+                                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                                    {"location": "Repairing", "condition": "Repaired"}
+                                ]
+                            }
+                            
+                            board = await db.boards.find_one(query)
+                            if board:
+                                # Update board
+                                await db.boards.update_one(
+                                    {"id": board["id"]},
+                                    {"$set": {
+                                        "location": "Issued for machine",
+                                        "issued_by": outward_data.issued_by_override or current_user.email,
+                                        "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
+                                        "project_number": bulk_request_doc["project_number"],
+                                        "issued_date_time": datetime.now(timezone.utc),
+                                        "comments": outward_data.comments or ""
+                                    }}
+                                )
+                                issued_boards.append(board["serial_number"])
+                            else:
+                                failed_boards.append(f"Category: {board_request['category_id']}, Serial: {board_request['serial_number']}")
+                        elif board_request.get("quantity"):
+                            # New format: assign boards now based on quantity
+                            quantity = board_request["quantity"]
+                            
+                            # Find available boards for this category
+                            available_boards = await db.boards.find({
+                                "category_id": board_request["category_id"],
+                                "$or": [
+                                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                                    {"location": "Repairing", "condition": "Repaired"}
+                                ]
+                            }).to_list(quantity)
+                            
+                            if len(available_boards) < quantity:
+                                failed_boards.append(f"Category: {board_request['category_id']} - Requested {quantity}, only {len(available_boards)} available")
+                                continue
+                            
+                            # Issue the boards
+                            for board in available_boards[:quantity]:
+                                await db.boards.update_one(
+                                    {"id": board["id"]},
+                                    {"$set": {
+                                        "location": "Issued for machine",
+                                        "issued_by": outward_data.issued_by_override or current_user.email,
+                                        "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
+                                        "project_number": bulk_request_doc["project_number"],
+                                        "issued_date_time": datetime.now(timezone.utc),
+                                        "comments": outward_data.comments or ""
+                                    }}
+                                )
+                                issued_boards.append(board["serial_number"])
                         
-                        board = await db.boards.find_one(query)
-                        if board:
-                            # Update board
-                            await db.boards.update_one(
-                                {"id": board["id"]},
-                                {"$set": {
-                                    "location": "Issued for machine",
-                                    "issued_by": outward_data.issued_by_override or current_user.email,
-                                    "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
-                                    "project_number": bulk_request_doc["project_number"],
-                                    "issued_date_time": datetime.now(timezone.utc),
-                                    "comments": outward_data.comments or ""
-                                }}
-                            )
-                            issued_boards.append(board["serial_number"])
-                        else:
-                            failed_boards.append(f"Category: {board_request['category_id']}, Serial: {board_request.get('serial_number', 'Any')}")
                     except Exception as e:
                         failed_boards.append(f"Category: {board_request['category_id']} - Error: {str(e)}")
                 
+                # Calculate expected total boards
+                expected_total = sum([
+                    br.get("quantity", 1) if br.get("quantity") else 1 
+                    for br in bulk_request_doc["boards"]
+                ])
+                
                 # Update bulk request status
-                if len(issued_boards) == len(bulk_request_doc["boards"]):
+                if len(issued_boards) == expected_total:
                     status = "issued"
                 elif len(issued_boards) > 0:
                     status = "partially_issued"
