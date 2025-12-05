@@ -78,15 +78,16 @@ const Outward = ({ user, onLogout }) => {
     if (request) {
       let details;
       if (isBulkRequest(request)) {
-        // For bulk requests, show summary
+        // For bulk requests, calculate total boards
+        const totalBoards = request.boards.reduce((sum, b) => sum + (b.quantity || 1), 0);
         details = {
           type: 'bulk-request',
           requestId: requestId,
           issuedTo: request.issued_to,
           issuedBy: user.email,
           projectNumber: request.project_number,
-          category: `Bulk Request (${request.boards.length} boards)`,
-          serialNumber: `${request.boards.length} boards total`,
+          category: `Bulk Request (${totalBoards} boards)`,
+          serialNumber: `${totalBoards} boards total`,
           boards: request.boards,
           timestamp: new Date().toLocaleString()
         };
