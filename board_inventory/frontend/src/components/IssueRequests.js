@@ -159,20 +159,10 @@ const IssueRequests = ({ user, onLogout }) => {
       // Ensure quantity is between 1 and 50
       const quantity = Math.max(1, Math.min(50, parseInt(value) || 1));
       newCategories[index][field] = quantity;
-      // Clear auto-select preview when quantity changes
-      newCategories[index]['auto_select_preview'] = [];
     } else if (field === 'category_id') {
-      // Reset selection when category changes
+      // Reset quantity when category changes
       newCategories[index][field] = value;
-      newCategories[index]['selected_boards'] = [];
       newCategories[index]['quantity'] = 1;
-      newCategories[index]['auto_select_preview'] = [];
-    } else if (field === 'mode') {
-      // Reset selection when mode changes
-      newCategories[index][field] = value;
-      newCategories[index]['selected_boards'] = [];
-      newCategories[index]['quantity'] = 1;
-      newCategories[index]['auto_select_preview'] = [];
     } else {
       newCategories[index][field] = value;
     }
