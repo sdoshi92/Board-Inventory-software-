@@ -535,7 +535,11 @@ const Outward = ({ user, onLogout }) => {
                         {issueDetails.boards.map((board, index) => (
                           <div key={index} className="text-xs text-gray-700 bg-white p-2 rounded">
                             <span className="font-medium">{getCategoryName(board.category_id)}</span>
-                            {board.serial_number && <span className="ml-2">({board.serial_number})</span>}
+                            {board.serial_number ? (
+                              <span className="ml-2">({board.serial_number})</span>
+                            ) : (
+                              <span className="ml-2 text-gray-500">(Qty: {board.quantity || 1} - to be assigned)</span>
+                            )}
                           </div>
                         ))}
                       </div>
