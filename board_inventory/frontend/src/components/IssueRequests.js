@@ -55,10 +55,7 @@ const IssueRequests = ({ user, onLogout }) => {
   const [bulkFormData, setBulkFormData] = useState({
     categories: [{ 
       category_id: '', 
-      mode: 'quantity', // 'quantity' or 'specific'
-      quantity: 1,
-      selected_boards: [], // Array of {id, serial_number, condition}
-      auto_select_preview: [] // Preview of boards that will be auto-selected
+      quantity: 1
     }], 
     issued_to: '',
     project_number: '',
