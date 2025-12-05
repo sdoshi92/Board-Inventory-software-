@@ -946,8 +946,8 @@ const IssueRequests = ({ user, onLogout }) => {
                   <div className="bg-blue-50 p-4 rounded-lg border">
                     <h4 className="font-medium text-blue-900 mb-2">Bulk Issue Request</h4>
                     <p className="text-sm text-blue-700">
-                      Issue multiple boards from up to 5 different categories in a single request.
-                      Only "New" and "Repaired" condition boards will be allocated.
+                      Request multiple boards from up to 5 different categories in a single request.
+                      Specify only the quantity needed - specific boards will be assigned by admin during approval.
                     </p>
                     <p className="text-xs text-blue-600 mt-1">
                       Total boards: {getTotalBoardsRequested()} • Max: 250
