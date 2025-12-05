@@ -238,11 +238,7 @@ const IssueRequests = ({ user, onLogout }) => {
 
   const getTotalBoardsRequested = () => {
     return bulkFormData.categories.reduce((total, cat) => {
-      if (cat.mode === 'specific') {
-        return total + (cat.selected_boards?.length || 0);
-      } else {
-        return total + (cat.auto_select_preview?.length || cat.quantity || 0);
-      }
+      return total + (cat.quantity || 0);
     }, 0);
   };
 
