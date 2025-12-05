@@ -173,12 +173,13 @@ class BoardUpdate(BaseModel):
 
 class BoardRequest(BaseModel):
     category_id: str
-    serial_number: str
-    condition: str
+    serial_number: Optional[str] = None  # Optional - assigned during issuance
+    condition: Optional[str] = None  # Optional - assigned during issuance
+    quantity: Optional[int] = None  # Used when serial_number not yet assigned
 
 class BulkIssueRequest(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    boards: List[BoardRequest]  # All boards in this bulk request
+    boards: List[BoardRequest]  # All boards in this bulk request (with or without serial numbers)
     requested_by: str
     issued_to: str
     project_number: str
