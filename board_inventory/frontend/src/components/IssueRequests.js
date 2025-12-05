@@ -526,10 +526,12 @@ const IssueRequests = ({ user, onLogout }) => {
             </h5>
             
             {isBulkRequest ? (
-              /* Bulk Request - Show all boards */
+              /* Bulk Request - Show all boards or quantities */
               <div className="space-y-2">
                 {request.boards.map((board, index) => {
                   const boardCategoryName = getCategoryName(board.category_id);
+                  const hasSerialNumber = board.serial_number;
+                  
                   return (
                     <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border">
                       <div className="flex items-center space-x-4">
@@ -538,16 +540,28 @@ const IssueRequests = ({ user, onLogout }) => {
                         </span>
                         <div>
                           <p className="font-medium text-gray-900">{boardCategoryName}</p>
-                          <p className="text-sm text-gray-600">Serial: {board.serial_number}</p>
+                          {hasSerialNumber ? (
+                            <p className="text-sm text-gray-600">Serial: {board.serial_number}</p>
+                          ) : (
+                            <p className="text-sm text-gray-600">Quantity: {board.quantity || 1} board{(board.quantity || 1) > 1 ? 's' : ''}</p>
+                          )}
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
-                          {board.condition}
-                        </Badge>
-                        <Badge className="text-xs bg-green-100 text-green-800">
-                          In Stock
-                        </Badge>
+                        {hasSerialNumber ? (
+                          <>
+                            <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
+                              {board.condition}
+                            </Badge>
+                            <Badge className="text-xs bg-green-100 text-green-800">
+                              In Stock
+                            </Badge>
+                          </>
+                        ) : (
+                          <Badge className="text-xs bg-yellow-100 text-yellow-800">
+                            To be assigned
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   );
@@ -556,7 +570,7 @@ const IssueRequests = ({ user, onLogout }) => {
                 {/* Summary */}
                 <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-lg">
                   <p className="text-sm font-medium text-green-800">
-                    Total: {request.boards.length} boards from {[...new Set(request.boards.map(b => getCategoryName(b.category_id)))].length} categories
+                    Total: {request.boards.reduce((sum, b) => sum + (b.quantity || 1), 0)} boards from {[...new Set(request.boards.map(b => getCategoryName(b.category_id)))].length} {[...new Set(request.boards.map(b => getCategoryName(b.category_id)))].length === 1 ? 'category' : 'categories'}
                   </p>
                 </div>
               </div>
