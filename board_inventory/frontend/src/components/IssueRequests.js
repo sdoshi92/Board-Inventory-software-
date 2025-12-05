@@ -1036,138 +1036,25 @@ const IssueRequests = ({ user, onLogout }) => {
                           )}
                         </div>
                         
-                        {/* Mode Selection */}
+                        {/* Quantity Input - Simplified */}
                         {category.category_id && getAvailableBoards(category.category_id).length > 0 && (
                           <div>
-                            <Label>Selection Mode</Label>
-                            <Select 
-                              value={category.mode} 
-                              onValueChange={(value) => updateCategory(index, 'mode', value)}
-                            >
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="quantity">By Quantity (Auto-select boards)</SelectItem>
-                                <SelectItem value="specific">Choose Specific Boards</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        )}
-                        
-                        {/* Quantity Mode */}
-                        {category.mode === 'quantity' && (
-                          <div className="space-y-3">
-                            <div>
-                              <Label>Quantity * (Max: 50)</Label>
-                              <div className="flex space-x-2">
-                                <Input
-                                  type="number"
-                                  min="1"
-                                  max="50"
-                                  value={category.quantity}
-                                  onChange={(e) => updateCategory(index, 'quantity', e.target.value)}
-                                  placeholder="Number of boards"
-                                  className="flex-1"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => previewAutoSelect(index)}
-                                  disabled={!category.category_id || !category.quantity}
-                                  className="whitespace-nowrap"
-                                >
-                                  Preview
-                                </Button>
-                              </div>
-                              {category.category_id && category.quantity > getAvailableBoardCount(category.category_id) && (
-                                <p className="text-xs text-red-600 mt-1">
-                                  Not enough boards available!
-                                </p>
-                              )}
-                            </div>
-                            
-                            {/* Auto-Select Preview */}
-                            {category.auto_select_preview && category.auto_select_preview.length > 0 && (
-                              <div>
-                                <Label>Boards that will be auto-selected:</Label>
-                                <div className="mt-2 max-h-40 overflow-y-auto border rounded-lg p-3 bg-green-50">
-                                  <div className="grid gap-2">
-                                    {category.auto_select_preview.map((board, boardIndex) => (
-                                      <div
-                                        key={board.id}
-                                        className="flex items-center justify-between p-2 bg-white border rounded border-green-200"
-                                      >
-                                        <div className="flex items-center space-x-3">
-                                          <span className="w-6 h-6 bg-green-100 text-green-800 rounded-full flex items-center justify-center text-xs font-medium">
-                                            {boardIndex + 1}
-                                          </span>
-                                          <div>
-                                            <span className="font-medium">{board.serial_number}</span>
-                                            <Badge className={`ml-2 text-xs ${getStatusBadge(board.condition)}`}>
-                                              {board.condition}
-                                            </Badge>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                                <p className="text-xs text-green-600 mt-2 font-medium">
-                                  ✓ {category.auto_select_preview.length} boards will be included in the request
-                                </p>
-                              </div>
+                            <Label>Quantity * (Max: 50)</Label>
+                            <Input
+                              type="number"
+                              min="1"
+                              max="50"
+                              value={category.quantity}
+                              onChange={(e) => updateCategory(index, 'quantity', e.target.value)}
+                              placeholder="Number of boards needed"
+                            />
+                            {category.category_id && category.quantity > getAvailableBoardCount(category.category_id) && (
+                              <p className="text-xs text-red-600 mt-1">
+                                Not enough boards available! Only {getAvailableBoardCount(category.category_id)} boards in stock.
+                              </p>
                             )}
-                          </div>
-                        )}
-                        
-                        {/* Specific Board Selection */}
-                        {category.mode === 'specific' && category.category_id && (
-                          <div>
-                            <Label>Select Specific Boards (Max: 50)</Label>
-                            <div className="mt-2 max-h-64 overflow-y-auto border rounded-lg p-3 bg-gray-50">
-                              {getAvailableBoards(category.category_id).length > 0 ? (
-                                <div className="grid gap-2">
-                                  {getAvailableBoards(category.category_id).map((board) => {
-                                    const isSelected = category.selected_boards.some(b => b.id === board.id);
-                                    return (
-                                      <div
-                                        key={board.id}
-                                        className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
-                                          isSelected ? 'bg-blue-100 border-blue-300' : 'bg-white border-gray-200 hover:border-gray-300'
-                                        }`}
-                                        onClick={() => toggleBoardSelection(index, board)}
-                                      >
-                                        <div className="flex items-center space-x-3">
-                                          <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            readOnly
-                                            className="w-4 h-4 text-blue-600"
-                                          />
-                                          <div>
-                                            <span className="font-medium">{board.serial_number}</span>
-                                            <div className="flex space-x-2 mt-1">
-                                              <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
-                                                {board.condition}
-                                              </Badge>
-                                              <Badge className="text-xs bg-green-100 text-green-800">
-                                                {board.location}
-                                              </Badge>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ) : (
-                                <p className="text-gray-500 text-center py-4">No boards available in this category</p>
-                              )}
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2">
-                              Selected: {category.selected_boards.length} / {getAvailableBoards(category.category_id).length}
+                            <p className="text-xs text-gray-500 mt-1">
+                              Specific boards will be assigned during approval
                             </p>
                           </div>
                         )}
