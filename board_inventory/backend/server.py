@@ -563,12 +563,13 @@ async def create_issue_request(request_data: IssueRequestCreate, current_user: U
 
 @api_router.post("/issue-requests/bulk")
 async def create_bulk_issue_request(bulk_request: BulkIssueRequestCreate, current_user: User = Depends(get_current_user)):
-    """Create a single bulk issue request for multiple categories"""
+    """Create a single bulk issue request for multiple categories - boards assigned during approval"""
     
-    all_boards_to_request = []
+    board_requests = []
     failed_categories = []
+    total_boards = 0
     
-    # Validate all categories and collect boards
+    # Validate all categories and check availability
     for category_request in bulk_request.categories:
         # Verify category exists
         category = await db.categories.find_one({"id": category_request.category_id})
@@ -580,73 +581,41 @@ async def create_bulk_issue_request(bulk_request: BulkIssueRequestCreate, curren
             })
             continue
         
-        # Check available "New" condition boards in stock
-        available_boards = await db.boards.find({
+        # Check available boards count
+        available_count = await db.boards.count_documents({
             "category_id": category_request.category_id,
             "location": "In stock",
-            "condition": "New"
-        }).to_list(None)
+            "condition": {"$in": ["New", "Repaired"]}
+        })
         
-        # Determine boards to request
-        if category_request.serial_numbers:
-            # Specific serial numbers requested
-            for serial in category_request.serial_numbers:
-                board = next((b for b in available_boards if b["serial_number"] == serial), None)
-                if not board:
-                    failed_categories.append({
-                        "category_id": category_request.category_id,
-                        "category_name": category.get("name", "Unknown"),
-                        "error": f"Board with serial number {serial} not available"
-                    })
-                    break
-                all_boards_to_request.append({
-                    "category_id": category_request.category_id,
-                    "category_name": category.get("name", "Unknown"),
-                    "serial_number": board["serial_number"],
-                    "condition": board["condition"]
-                })
-            else:
-                # All serial numbers are valid, continue processing
-                continue
-            # Skip if this category had failures
-            break
-        else:
-            # Quantity-based request
-            if category_request.quantity and len(available_boards) < category_request.quantity:
+        # Validate quantity
+        if category_request.quantity:
+            if available_count < category_request.quantity:
                 failed_categories.append({
                     "category_id": category_request.category_id,
                     "category_name": category.get("name", "Unknown"),
-                    "error": f"Not enough boards available. Requested: {category_request.quantity}, Available: {len(available_boards)}"
+                    "error": f"Not enough boards available. Requested: {category_request.quantity}, Available: {available_count}"
                 })
                 continue
             
-            # Add boards to request list
-            boards_for_category = available_boards[:category_request.quantity] if category_request.quantity else []
-            for board in boards_for_category:
-                all_boards_to_request.append({
-                    "category_id": category_request.category_id,
-                    "category_name": category.get("name", "Unknown"),
-                    "serial_number": board["serial_number"],
-                    "condition": board["condition"]
-                })
+            # Store category-quantity pair (boards will be assigned during issuance)
+            board_requests.append(
+                BoardRequest(
+                    category_id=category_request.category_id,
+                    quantity=category_request.quantity
+                )
+            )
+            total_boards += category_request.quantity
     
     if failed_categories:
         # Some categories failed
         error_details = "; ".join([f"{cat['category_name']}: {cat['error']}" for cat in failed_categories])
         raise HTTPException(status_code=400, detail=f"Bulk request failed: {error_details}")
     
-    if not all_boards_to_request:
-        raise HTTPException(status_code=400, detail="No boards to request")
+    if not board_requests:
+        raise HTTPException(status_code=400, detail="No valid board requests")
     
-    # Create single bulk issue request
-    board_requests = [
-        BoardRequest(
-            category_id=board["category_id"],
-            serial_number=board["serial_number"],
-            condition=board["condition"]
-        ) for board in all_boards_to_request
-    ]
-    
+    # Create bulk issue request without specific boards assigned
     bulk_issue_request = BulkIssueRequest(
         boards=board_requests,
         requested_by=current_user.email,
@@ -658,11 +627,11 @@ async def create_bulk_issue_request(bulk_request: BulkIssueRequestCreate, curren
     await db.bulk_issue_requests.insert_one(bulk_issue_request.dict())
     
     return {
-        "message": f"Successfully created bulk issue request for {len(all_boards_to_request)} boards",
+        "message": f"Successfully created bulk issue request for {total_boards} boards",
         "request_id": bulk_issue_request.id,
-        "total_boards": len(all_boards_to_request),
-        "successful": len(all_boards_to_request),  # For frontend compatibility
-        "boards": all_boards_to_request
+        "total_boards": total_boards,
+        "successful": total_boards,  # For frontend compatibility
+        "boards": [{"category_id": br.category_id, "quantity": br.quantity} for br in board_requests]
     }
 
 @api_router.get("/issue-requests", response_model=List[IssueRequest])
