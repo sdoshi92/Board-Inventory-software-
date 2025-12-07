@@ -348,8 +348,32 @@ const IssueRequests = ({ user, onLogout }) => {
   };
 
   const handleApprove = async (requestId) => {
+    // Check if this is a bulk request
+    const bulkRequest = bulkRequests.find(req => req.id === requestId);
+    
+    if (bulkRequest) {
+      // Check if boards need to be assigned (new format with quantity)
+      const needsAssignment = bulkRequest.boards.some(b => !b.serial_number && b.quantity);
+      
+      if (needsAssignment) {
+        // Open dialog to assign boards
+        setRequestToApprove(bulkRequest);
+        
+        // Initialize board assignments
+        const initialAssignments = bulkRequest.boards.map(board => ({
+          category_id: board.category_id,
+          quantity: board.quantity || 1,
+          selected_boards: []
+        }));
+        
+        setBoardAssignments(initialAssignments);
+        setApprovalDialog(true);
+        return;
+      }
+    }
+    
+    // For single requests or bulk requests with pre-assigned boards, approve directly
     try {
-      // Check if this is a bulk request by finding it in bulkRequests array
       const isBulkRequest = bulkRequests.some(req => req.id === requestId);
       const endpoint = isBulkRequest ? `/bulk-issue-requests/${requestId}` : `/issue-requests/${requestId}`;
       
