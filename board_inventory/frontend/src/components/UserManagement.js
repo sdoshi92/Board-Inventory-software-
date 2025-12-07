@@ -412,21 +412,37 @@ const UserManagement = ({ user, onLogout }) => {
               
               <div>
                 <Label>Specific Permissions</Label>
-                <p className="text-sm text-gray-500 mb-3">Grant specific permissions beyond role defaults</p>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {availablePermissions.map((permission) => (
-                    <div key={permission} className="flex items-center space-x-2">
-                      <Switch
-                        id={permission}
-                        checked={(formData.permissions || []).includes(permission)}
-                        onCheckedChange={() => togglePermission(permission)}
-                      />
-                      <Label htmlFor={permission} className="text-sm font-normal">
-                        {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                      </Label>
-                    </div>
-                  ))}
+                <p className="text-sm text-gray-500 mb-2">Grant specific permissions for this user</p>
+                <div className="bg-blue-50 p-3 rounded-lg mb-3 border border-blue-200">
+                  <p className="text-xs text-blue-700">
+                    <strong>Note:</strong> Admins have all permissions by default. For Managers and Users, select specific permissions below. Changes take effect within 30 seconds.
+                  </p>
                 </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3 bg-gray-50">
+                  {availablePermissions.length > 0 ? (
+                    availablePermissions.map((permission) => (
+                      <div key={permission} className="flex items-center space-x-2 py-1">
+                        <Switch
+                          id={permission}
+                          checked={(formData.permissions || []).includes(permission)}
+                          onCheckedChange={() => togglePermission(permission)}
+                          disabled={formData.role === 'admin'}
+                        />
+                        <Label 
+                          htmlFor={permission} 
+                          className={`text-sm font-normal cursor-pointer ${formData.role === 'admin' ? 'text-gray-400' : ''}`}
+                        >
+                          {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </Label>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No permissions available</p>
+                  )}
+                </div>
+                {formData.role === 'admin' && (
+                  <p className="text-xs text-gray-500 mt-2 italic">Admins automatically have all permissions</p>
+                )}
               </div>
               
               <div className="flex justify-end space-x-3 pt-4">
