@@ -387,6 +387,66 @@ const IssueRequests = ({ user, onLogout }) => {
     }
   };
 
+  const confirmApprovalWithBoards = async () => {
+    if (!requestToApprove) return;
+    
+    // Validate all boards are assigned
+    for (let i = 0; i < boardAssignments.length; i++) {
+      const assignment = boardAssignments[i];
+      if (assignment.selected_boards.length !== assignment.quantity) {
+        const categoryName = getCategoryName(assignment.category_id);
+        toast.error(`Please select ${assignment.quantity} boards for ${categoryName}`);
+        return;
+      }
+    }
+    
+    try {
+      // Update the bulk request with assigned boards
+      const updatedBoards = boardAssignments.flatMap(assignment => 
+        assignment.selected_boards.map(board => ({
+          category_id: assignment.category_id,
+          serial_number: board.serial_number,
+          condition: board.condition
+        }))
+      );
+      
+      await axios.put(`${API}/bulk-issue-requests/${requestToApprove.id}/assign-boards`, {
+        boards: updatedBoards,
+        status: 'approved'
+      });
+      
+      toast.success('Request approved with assigned boards');
+      setApprovalDialog(false);
+      setRequestToApprove(null);
+      setBoardAssignments([]);
+      fetchRequests();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to approve request with board assignments');
+    }
+  };
+  
+  const toggleBoardAssignment = (assignmentIndex, board) => {
+    const newAssignments = [...boardAssignments];
+    const assignment = newAssignments[assignmentIndex];
+    const existingIndex = assignment.selected_boards.findIndex(b => b.id === board.id);
+    
+    if (existingIndex >= 0) {
+      // Remove board
+      assignment.selected_boards.splice(existingIndex, 1);
+    } else {
+      // Add board if not at capacity
+      if (assignment.selected_boards.length < assignment.quantity) {
+        assignment.selected_boards.push({
+          id: board.id,
+          serial_number: board.serial_number,
+          condition: board.condition
+        });
+      }
+    }
+    
+    setBoardAssignments(newAssignments);
+  };
+
   const handleReject = async (requestId) => {
     try {
       // Check if this is a bulk request by finding it in bulkRequests array
