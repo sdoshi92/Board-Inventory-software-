@@ -38,6 +38,11 @@ const Layout = ({ children, user, onLogout }) => {
 
     if (user) {
       fetchUserPermissions();
+      
+      // Refresh permissions every 30 seconds to pick up changes
+      const intervalId = setInterval(fetchUserPermissions, 30000);
+      
+      return () => clearInterval(intervalId);
     }
   }, [user]);
 
