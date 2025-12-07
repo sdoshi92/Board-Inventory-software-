@@ -1220,6 +1220,128 @@ const IssueRequests = ({ user, onLogout }) => {
           </DialogContent>
         </Dialog>
 
+        {/* Board Assignment Approval Dialog */}
+        <Dialog open={approvalDialog} onOpenChange={setApprovalDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span>Assign Boards for Approval</span>
+              </DialogTitle>
+              <DialogDescription>
+                Select specific boards for each category before approving this request
+              </DialogDescription>
+            </DialogHeader>
+            
+            {requestToApprove && (
+              <div className="space-y-6">
+                {/* Request Info */}
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-xs text-blue-600 font-medium">Issued To</p>
+                      <p className="text-sm text-blue-900">{requestToApprove.issued_to_name || requestToApprove.issued_to}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-blue-600 font-medium">Project Number</p>
+                      <p className="text-sm text-blue-900">{requestToApprove.project_number}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Board Assignments */}
+                {boardAssignments.map((assignment, index) => {
+                  const categoryName = getCategoryName(assignment.category_id);
+                  const availableBoards = getAvailableBoards(assignment.category_id);
+                  
+                  return (
+                    <Card key={index} className="border-2">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-lg flex items-center justify-between">
+                          <span>{categoryName}</span>
+                          <Badge className="text-xs">
+                            {assignment.selected_boards.length} / {assignment.quantity} selected
+                          </Badge>
+                        </CardTitle>
+                        <CardDescription>
+                          Select {assignment.quantity} board{assignment.quantity > 1 ? 's' : ''} from available stock
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="max-h-64 overflow-y-auto border rounded-lg p-3 bg-gray-50">
+                          {availableBoards.length > 0 ? (
+                            <div className="grid gap-2">
+                              {availableBoards.map((board) => {
+                                const isSelected = assignment.selected_boards.some(b => b.id === board.id);
+                                const isDisabled = !isSelected && assignment.selected_boards.length >= assignment.quantity;
+                                
+                                return (
+                                  <div
+                                    key={board.id}
+                                    className={`flex items-center justify-between p-3 border rounded-lg cursor-pointer transition-colors ${
+                                      isSelected ? 'bg-blue-100 border-blue-300' : 
+                                      isDisabled ? 'bg-gray-100 border-gray-200 opacity-50 cursor-not-allowed' :
+                                      'bg-white border-gray-200 hover:border-gray-300'
+                                    }`}
+                                    onClick={() => !isDisabled && toggleBoardAssignment(index, board)}
+                                  >
+                                    <div className="flex items-center space-x-3">
+                                      <input
+                                        type="checkbox"
+                                        checked={isSelected}
+                                        readOnly
+                                        disabled={isDisabled}
+                                        className="w-4 h-4 text-blue-600"
+                                      />
+                                      <div>
+                                        <span className="font-medium">{board.serial_number}</span>
+                                        <div className="flex space-x-2 mt-1">
+                                          <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
+                                            {board.condition}
+                                          </Badge>
+                                          <Badge className="text-xs bg-green-100 text-green-800">
+                                            {board.location}
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className="text-gray-500 text-center py-4">No boards available in this category</p>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+                
+                <div className="flex justify-end space-x-3 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setApprovalDialog(false);
+                      setRequestToApprove(null);
+                      setBoardAssignments([]);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    onClick={confirmApprovalWithBoards}
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Approve with Assigned Boards
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
         {/* Delete Confirmation Dialog */}
         <Dialog open={deleteConfirmDialog} onOpenChange={setDeleteConfirmDialog}>
           <DialogContent className="sm:max-w-md">
