@@ -44,6 +44,9 @@ const IssueRequests = ({ user, onLogout }) => {
   });
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState(false);
   const [requestToDelete, setRequestToDelete] = useState(null);
+  const [approvalDialog, setApprovalDialog] = useState(false);
+  const [requestToApprove, setRequestToApprove] = useState(null);
+  const [boardAssignments, setBoardAssignments] = useState([]);
   const [formData, setFormData] = useState({
     category_id: '',
     serial_number: '',
