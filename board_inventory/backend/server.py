@@ -785,6 +785,58 @@ async def delete_bulk_issue_request(request_id: str, current_user: User = Depend
     
     return {"message": "Bulk request deleted successfully"}
 
+class BoardAssignmentUpdate(BaseModel):
+    boards: List[BoardRequest]
+    status: str = "approved"
+
+@api_router.put("/bulk-issue-requests/{request_id}/assign-boards")
+async def assign_boards_to_bulk_request(
+    request_id: str, 
+    assignment: BoardAssignmentUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Assign specific boards to a bulk request and approve it"""
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can assign boards and approve requests")
+    
+    # Find the bulk request
+    request_doc = await db.bulk_issue_requests.find_one({"id": request_id})
+    if not request_doc:
+        raise HTTPException(status_code=404, detail="Bulk issue request not found")
+    
+    # Validate all boards are available
+    for board_request in assignment.boards:
+        if board_request.serial_number:
+            board = await db.boards.find_one({
+                "category_id": board_request.category_id,
+                "serial_number": board_request.serial_number,
+                "$or": [
+                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                    {"location": "Repairing", "condition": "Repaired"}
+                ]
+            })
+            if not board:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Board {board_request.serial_number} is not available"
+                )
+    
+    # Update the bulk request with assigned boards and approved status
+    update_dict = {
+        "boards": [br.dict() for br in assignment.boards],
+        "status": assignment.status,
+        "approved_by": current_user.email,
+        "approved_date": datetime.now(timezone.utc).isoformat()
+    }
+    
+    await db.bulk_issue_requests.update_one(
+        {"id": request_id},
+        {"$set": update_dict}
+    )
+    
+    updated_request = await db.bulk_issue_requests.find_one({"id": request_id})
+    return BulkIssueRequest(**updated_request)
+
 class OutwardRequest(BaseModel):
     request_id: Optional[str] = None
     board_id: Optional[str] = None
