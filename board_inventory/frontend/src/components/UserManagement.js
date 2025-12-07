@@ -123,7 +123,7 @@ const UserManagement = ({ user, onLogout }) => {
         is_active: formData.is_active
       });
       
-      toast.success('User updated successfully');
+      toast.success('User updated successfully. Changes will be reflected within 30 seconds.');
       setDialogOpen(false);
       resetForm();
       fetchUsers();
