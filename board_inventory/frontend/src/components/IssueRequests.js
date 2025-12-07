@@ -357,7 +357,12 @@ const IssueRequests = ({ user, onLogout }) => {
     
     if (bulkRequest) {
       // Check if boards need to be assigned (new format with quantity)
-      const needsAssignment = bulkRequest.boards.some(b => !b.serial_number && b.quantity);
+      const needsAssignment = bulkRequest.boards.some(b => {
+        const hasQuantity = b.quantity !== undefined && b.quantity !== null;
+        const noSerial = !b.serial_number;
+        console.log('Board check:', { board: b, hasQuantity, noSerial, result: noSerial && hasQuantity });
+        return noSerial && hasQuantity;
+      });
       console.log('needsAssignment:', needsAssignment);
       console.log('bulkRequest.boards:', bulkRequest.boards);
       
