@@ -348,15 +348,22 @@ const IssueRequests = ({ user, onLogout }) => {
   };
 
   const handleApprove = async (requestId) => {
+    console.log('handleApprove called with requestId:', requestId);
+    console.log('bulkRequests:', bulkRequests);
+    
     // Check if this is a bulk request
     const bulkRequest = bulkRequests.find(req => req.id === requestId);
+    console.log('Found bulkRequest:', bulkRequest);
     
     if (bulkRequest) {
       // Check if boards need to be assigned (new format with quantity)
       const needsAssignment = bulkRequest.boards.some(b => !b.serial_number && b.quantity);
+      console.log('needsAssignment:', needsAssignment);
+      console.log('bulkRequest.boards:', bulkRequest.boards);
       
       if (needsAssignment) {
         // Open dialog to assign boards
+        console.log('Opening dialog for board assignment');
         setRequestToApprove(bulkRequest);
         
         // Initialize board assignments
@@ -366,6 +373,7 @@ const IssueRequests = ({ user, onLogout }) => {
           selected_boards: []
         }));
         
+        console.log('initialAssignments:', initialAssignments);
         setBoardAssignments(initialAssignments);
         setApprovalDialog(true);
         return;
