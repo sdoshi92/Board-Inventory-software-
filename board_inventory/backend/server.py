@@ -144,7 +144,7 @@ class Board(BaseModel):
     category_id: str
     serial_number: str
     location: str = "In stock"  # In stock, Issued for machine, Repairing, Issued for spares, At customer site
-    condition: str = "OK"  # OK, Needs repair, Scrap
+    condition: str = "New"  # New, Repaired, Repairing, Scrap, Under repair, Needs repair, OK (legacy values may exist)
     issued_by: Optional[str] = None
     issued_to: Optional[str] = None
     qc_by: Optional[str] = None
