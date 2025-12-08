@@ -57,19 +57,16 @@ const Inward = ({ user, onLogout }) => {
     comments: ''
   });
 
-  // Conditions based on inward type
-  const getAvailableConditions = () => {
-    console.log('getAvailableConditions called, inwardType:', inwardType);
+  // Conditions based on inward type - memoized to react to inwardType changes
+  const availableConditions = useMemo(() => {
+    console.log('Calculating available conditions, inwardType:', inwardType);
     if (inwardType === 'new') {
       return ['New']; // New boards can only be in "New" condition
     } else if (inwardType === 'repair') {
       return ['Repairing', 'New', 'Repaired', 'Scrap']; // Repair/Return boards can have multiple conditions
     }
     return ['New']; // Default
-  };
-  
-  const availableConditions = getAvailableConditions();
-  console.log('Available conditions:', availableConditions);
+  }, [inwardType]);
 
   useEffect(() => {
     fetchBoards();
