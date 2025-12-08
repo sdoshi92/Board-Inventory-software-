@@ -596,7 +596,7 @@ const Inward = ({ user, onLogout }) => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {conditions.map((condition) => (
+                          {getAvailableConditions().map((condition) => (
                             <SelectItem key={condition} value={condition}>
                               {condition}
                             </SelectItem>
@@ -767,7 +767,7 @@ const Inward = ({ user, onLogout }) => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {conditions.map((condition) => (
+                          {getAvailableConditions().map((condition) => (
                             <SelectItem key={condition} value={condition}>
                               {condition}
                             </SelectItem>
