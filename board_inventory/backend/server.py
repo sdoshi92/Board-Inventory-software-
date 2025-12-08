@@ -159,7 +159,7 @@ class BoardCreate(BaseModel):
     category_id: str
     serial_number: str
     location: str = "In stock"
-    condition: str = "OK"
+    condition: str = "New"
     qc_by: Optional[str] = None
     comments: Optional[str] = None
 
