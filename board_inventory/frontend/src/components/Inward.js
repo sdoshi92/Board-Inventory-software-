@@ -59,6 +59,7 @@ const Inward = ({ user, onLogout }) => {
 
   // Conditions based on inward type
   const getAvailableConditions = () => {
+    console.log('getAvailableConditions called, inwardType:', inwardType);
     if (inwardType === 'new') {
       return ['New']; // New boards can only be in "New" condition
     } else if (inwardType === 'repair') {
@@ -66,6 +67,9 @@ const Inward = ({ user, onLogout }) => {
     }
     return ['New']; // Default
   };
+  
+  const availableConditions = getAvailableConditions();
+  console.log('Available conditions:', availableConditions);
 
   useEffect(() => {
     fetchBoards();
