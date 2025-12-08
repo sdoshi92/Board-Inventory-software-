@@ -96,7 +96,7 @@ const Inward = ({ user, onLogout }) => {
     setFormData({
       category_id: '',
       serial_number: '',
-      condition: inwardType === 'new' ? 'New' : 'New', // Allow all conditions for repair workflow
+      condition: inwardType === 'new' ? 'New' : 'Repairing', // New boards default to "New", repair default to "Repairing"
       qc_by: '',
       comments: '',
       picture: null
