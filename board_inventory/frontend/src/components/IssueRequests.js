@@ -241,11 +241,18 @@ const IssueRequests = ({ user, onLogout }) => {
 
   const getAvailableBoardCount = (categoryId) => {
     if (!categoryId) return 0;
-    return boards.filter(board => 
-      board.category_id === categoryId && 
-      board.location === 'In stock' && 
-      (board.condition === 'New' || board.condition === 'Repaired')
-    ).length;
+    return boards.filter(board => {
+      // Exclude scrap boards
+      if (board.condition === 'Scrap') return false;
+      
+      // Include boards that are available for issue
+      const isInStock = board.location === 'In stock' && 
+                        (board.condition === 'New' || board.condition === 'Repaired');
+      const isRepairedAndReady = board.location === 'Repairing' && 
+                                 board.condition === 'Repaired';
+      
+      return board.category_id === categoryId && (isInStock || isRepairedAndReady);
+    }).length;
   };
 
   const getTotalBoardsRequested = () => {
