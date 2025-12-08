@@ -57,7 +57,15 @@ const Inward = ({ user, onLogout }) => {
     comments: ''
   });
 
-  const conditions = ['New', 'Repaired', 'Scrap'];
+  // Conditions based on inward type
+  const getAvailableConditions = () => {
+    if (inwardType === 'new') {
+      return ['New']; // New boards can only be in "New" condition
+    } else if (inwardType === 'repair') {
+      return ['Repairing', 'New', 'Repaired', 'Scrap']; // Repair/Return boards can have multiple conditions
+    }
+    return ['New']; // Default
+  };
 
   useEffect(() => {
     fetchBoards();
