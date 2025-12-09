@@ -33,14 +33,6 @@ const Search = ({ user, onLogout }) => {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const locations = [
-    'In stock',
-    'Issued for machine',
-    'Repairing',
-    'Issued for spares',
-    'At customer site'
-  ];
-
   const conditions = ['New', 'Repaired', 'Scrap'];
 
   const fetchCategories = async () => {
