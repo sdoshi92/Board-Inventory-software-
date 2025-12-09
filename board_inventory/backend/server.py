@@ -1125,13 +1125,11 @@ async def get_low_stock_report(current_user: User = Depends(get_current_user)):
     low_stock_report = []
     
     for category in categories:
-        # Count current stock (In stock + Repairing with condition Repaired)
+        # Count current stock (available boards)
         current_stock = await db.boards.count_documents({
             "category_id": category["id"],
-            "$or": [
-                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                {"location": "Repairing", "condition": "Repaired"}
-            ]
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         })
         
         min_stock = category.get("minimum_stock_quantity", 0)
