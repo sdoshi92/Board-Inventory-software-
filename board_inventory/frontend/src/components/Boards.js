@@ -280,23 +280,6 @@ const Boards = ({ user, onLogout }) => {
               </div>
               
               <div>
-                <Label>Location</Label>
-                <Select value={filterLocation} onValueChange={setFilterLocation}>
-                  <SelectTrigger data-testid="location-filter">
-                    <SelectValue placeholder="All locations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All locations</SelectItem>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
                 <Label>Condition</Label>
                 <Select value={filterCondition} onValueChange={setFilterCondition}>
                   <SelectTrigger data-testid="condition-filter">
