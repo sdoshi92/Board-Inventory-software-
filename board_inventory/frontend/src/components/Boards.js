@@ -20,7 +20,6 @@ import {
   CheckCircle,
   AlertTriangle,
   XCircle,
-  MapPin,
   Calendar,
   User
 } from 'lucide-react';
