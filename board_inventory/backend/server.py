@@ -803,10 +803,8 @@ async def assign_boards_to_bulk_request(
             board = await db.boards.find_one({
                 "category_id": board_request.category_id,
                 "serial_number": board_request.serial_number,
-                "$or": [
-                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                    {"location": "Repairing", "condition": "Repaired"}
-                ]
+                "condition": {"$in": ["New", "Repaired"]},
+                "issued_to": None  # Not issued to anyone
             })
             if not board:
                 raise HTTPException(
