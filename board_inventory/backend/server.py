@@ -1154,12 +1154,9 @@ async def get_under_repair_report(current_user: User = Depends(get_current_user)
     if not check_permission(current_user, "view_reports"):
         raise HTTPException(status_code=403, detail="Permission denied: view_reports required")
     
-    # Find all boards with condition "Under repair" or location "Repairing" with condition not "Repaired"
+    # Find all boards with condition "Repairing" (still being repaired)
     under_repair_boards = await db.boards.find({
-        "$or": [
-            {"condition": "Under repair"},
-            {"location": "Repairing", "condition": {"$ne": "Repaired"}}
-        ]
+        "condition": "Repairing"
     }).to_list(1000)
     
     # Get category information for each board
@@ -1175,7 +1172,6 @@ async def get_under_repair_report(current_user: User = Depends(get_current_user)
             "manufacturer": category.get("manufacturer", "Unknown"),
             "version": category.get("version", "Unknown"),
             "condition": board["condition"],
-            "location": board["location"],
             "inward_date": board.get("inward_date_time", ""),
             "comments": board.get("comments", "")
         })
