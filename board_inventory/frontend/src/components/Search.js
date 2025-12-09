@@ -73,12 +73,13 @@ const Search = ({ user, onLogout }) => {
     
     // Handle URL parameters for direct filtering (e.g., from dashboard)
     const urlParams = new URLSearchParams(location.search);
-    const locationParam = urlParams.get('location');
-    
-    if (locationParam) {
-      setLocationFilter(locationParam);
-      // Auto-search when coming from dashboard with filter
-      setTimeout(() => performSearch(), 500);
+    const categoryParam = urlParams.get('category_id');
+    const conditionParam = urlParams.get('condition');
+    if (categoryParam) {
+      setCategoryFilter(categoryParam);
+    }
+    if (conditionParam) {
+      setConditionFilter(conditionParam);
     }
   }, [location.search]);
 
