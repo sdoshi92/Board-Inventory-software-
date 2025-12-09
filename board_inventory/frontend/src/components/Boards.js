@@ -191,14 +191,13 @@ const Boards = ({ user, onLogout }) => {
 
   const filteredBoards = boards.filter(board => {
     const matchesCategory = !filterCategory || filterCategory === 'all' || board.category_id === filterCategory;
-    const matchesLocation = !filterLocation || filterLocation === 'all' || board.location === filterLocation;
     const matchesCondition = !filterCondition || filterCondition === 'all' || board.condition === filterCondition;
     const matchesSearch = !searchTerm || 
       board.serial_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (board.issued_to && board.issued_to.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (board.project_number && board.project_number.toLowerCase().includes(searchTerm.toLowerCase()));
     
-    return matchesCategory && matchesLocation && matchesCondition && matchesSearch;
+    return matchesCategory && matchesCondition && matchesSearch;
   });
 
   if (loading) {
