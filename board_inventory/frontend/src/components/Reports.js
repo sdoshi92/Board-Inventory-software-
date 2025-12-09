@@ -690,7 +690,6 @@ const Reports = ({ user, onLogout }) => {
                                       {board.condition}
                                     </Badge>
                                   </td>
-                                  <td className="border border-gray-300 px-3 py-2 text-sm">{board.location}</td>
                                   <td className="border border-gray-300 px-3 py-2 text-sm">{board.issued_to || '-'}</td>
                                   <td className="border border-gray-300 px-3 py-2 text-sm">{board.project_number || '-'}</td>
                                 </tr>
