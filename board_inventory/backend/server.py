@@ -1788,21 +1788,23 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Permission denied: view_dashboard required")
     total_categories = await db.categories.count_documents({})
     total_boards = await db.boards.count_documents({})
-    in_stock = await db.boards.count_documents({
-        "location": "In stock", 
-        "condition": {"$in": ["New", "Repaired"]}
+    available = await db.boards.count_documents({
+        "condition": {"$in": ["New", "Repaired"]},
+        "issued_to": None  # Not issued to anyone
     })
-    issued = await db.boards.count_documents({"location": {"$ne": "In stock"}})
+    issued = await db.boards.count_documents({"issued_to": {"$ne": None}})
     repaired = await db.boards.count_documents({"condition": "Repaired"})
+    repairing = await db.boards.count_documents({"condition": "Repairing"})
     scrap = await db.boards.count_documents({"condition": "Scrap"})
     pending_requests = await db.issue_requests.count_documents({"status": "pending"})
     
     return {
         "total_categories": total_categories,
         "total_boards": total_boards,
-        "in_stock": in_stock,
+        "available": available,
         "issued": issued,
         "repaired": repaired,
+        "repairing": repairing,
         "scrap": scrap,
         "pending_requests": pending_requests
     }
