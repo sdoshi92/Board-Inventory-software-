@@ -1355,9 +1355,9 @@ async def get_category_export_data(category_id: str, current_user: User = Depend
         "bulk_issue_requests": clean_bulk_requests,
         "statistics": {
             "total_boards": len(boards),
-            "in_stock": len([b for b in boards if b["location"] == "In stock"]),
-            "issued": len([b for b in boards if b["location"] == "Issued for machine"]),
-            "repairing": len([b for b in boards if b["location"] == "Repairing"]),
+            "available": len([b for b in boards if not b.get("issued_to")]),
+            "issued": len([b for b in boards if b.get("issued_to")]),
+            "repairing": len([b for b in boards if b["condition"] == "Repairing"]),
             "total_requests": len(issue_requests),
             "total_bulk_requests": len(bulk_requests)
         }
