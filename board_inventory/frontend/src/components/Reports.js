@@ -732,7 +732,7 @@ const Reports = ({ user, onLogout }) => {
                   <h4 className="font-semibold text-sm mb-2 text-blue-800">Excel Export Includes:</h4>
                   <ul className="text-sm text-blue-700 space-y-1">
                     <li>• Complete category information and settings</li>
-                    <li>• All boards with serial numbers, conditions, and locations</li>
+                    <li>• All boards with serial numbers and conditions</li>
                     <li>• Full issue request history for the category</li>
                     <li>• Board assignment and project history</li>
                     <li>• Comments and maintenance records</li>
