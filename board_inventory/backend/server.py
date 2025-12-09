@@ -685,11 +685,11 @@ async def preview_auto_select_boards(request: dict, current_user: User = Depends
     if not category_id or quantity <= 0:
         raise HTTPException(status_code=400, detail="Category ID and quantity required")
     
-    # Get available boards
+    # Get available boards (not issued and in good condition)
     available_boards = await db.boards.find({
         "category_id": category_id,
-        "location": "In stock",
-        "condition": "New"
+        "condition": {"$in": ["New", "Repaired"]},
+        "issued_to": None  # Not issued to anyone
     }).to_list(None)
     
     if len(available_boards) < quantity:
