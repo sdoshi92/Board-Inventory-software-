@@ -143,8 +143,7 @@ class Board(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     category_id: str
     serial_number: str
-    location: str = "In stock"  # In stock, Issued for machine, Repairing, Issued for spares, At customer site
-    condition: str = "New"  # New, Repaired, Repairing, Scrap, Under repair, Needs repair, OK (legacy values may exist)
+    condition: str = "New"  # New, Repaired, Repairing, Scrap
     issued_by: Optional[str] = None
     issued_to: Optional[str] = None
     qc_by: Optional[str] = None
