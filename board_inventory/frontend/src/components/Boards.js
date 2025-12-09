@@ -301,7 +301,6 @@ const Boards = ({ user, onLogout }) => {
                   variant="outline" 
                   onClick={() => {
                     setFilterCategory('all');
-                    setFilterLocation('all');
                     setFilterCondition('all');
                     setSearchTerm('');
                   }}
