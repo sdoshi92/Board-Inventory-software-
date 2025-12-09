@@ -52,7 +52,6 @@ const Search = ({ user, onLogout }) => {
       const params = new URLSearchParams();
       if (searchQuery) params.append('query', searchQuery);
       if (categoryFilter && categoryFilter !== 'all') params.append('category_id', categoryFilter);
-      if (locationFilter && locationFilter !== 'all') params.append('location', locationFilter);
       if (conditionFilter && conditionFilter !== 'all') params.append('condition', conditionFilter);
       
       const response = await axios.get(`${API}/search?${params.toString()}`);
