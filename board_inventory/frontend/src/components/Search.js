@@ -106,17 +106,6 @@ const Search = ({ user, onLogout }) => {
     return variants[condition] || 'bg-gray-100 text-gray-800';
   };
 
-  const getLocationBadge = (location) => {
-    const variants = {
-      'In stock': 'bg-blue-100 text-blue-800',
-      'Issued for machine': 'bg-purple-100 text-purple-800',
-      'Repairing': 'bg-orange-100 text-orange-800',
-      'Issued for spares': 'bg-indigo-100 text-indigo-800',
-      'At customer site': 'bg-pink-100 text-pink-800'
-    };
-    return variants[location] || 'bg-gray-100 text-gray-800';
-  };
-
   return (
     <Layout user={user} onLogout={onLogout}>
       <div className="space-y-6 animate-fade-in">
