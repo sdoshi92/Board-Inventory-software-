@@ -982,13 +982,11 @@ async def issue_board(
         return {"message": "Board issued successfully", "serial_number": board["serial_number"]}
     
     elif outward_data.board_id and outward_data.issued_to:
-        # Direct board issue (New/Repaired boards that are In stock OR Repaired boards that are being repaired)
+        # Direct board issue (not issued and in good condition)
         board = await db.boards.find_one({
             "id": outward_data.board_id,
-            "$or": [
-                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                {"location": "Repairing", "condition": "Repaired"}
-            ]
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         })
         if not board:
             raise HTTPException(status_code=400, detail="Board not available")
@@ -996,7 +994,6 @@ async def issue_board(
         await db.boards.update_one(
             {"id": outward_data.board_id},
             {"$set": {
-                "location": "Issued for machine",
                 "issued_by": outward_data.issued_by_override or current_user.email,
                 "issued_to": outward_data.issued_to_override or outward_data.issued_to,
                 "project_number": outward_data.project_number or "",
