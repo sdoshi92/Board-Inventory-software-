@@ -373,16 +373,6 @@ const Boards = ({ user, onLogout }) => {
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 flex items-center">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        Location
-                      </span>
-                      <Badge className={`text-xs ${getLocationBadge(board.location)}`}>
-                        {board.location}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-600">Condition</span>
                       <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
                         {board.condition}
