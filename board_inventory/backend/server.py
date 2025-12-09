@@ -1273,11 +1273,11 @@ async def get_serial_numbers_by_category(category_id: str, current_user: User = 
     
     serial_numbers = []
     for board in boards:
+        issued_status = "Issued" if board.get("issued_to") else "Available"
         serial_numbers.append({
             "serial_number": board["serial_number"],
             "condition": board["condition"],
-            "location": board["location"],
-            "status": f"{board['condition']} - {board['location']}"
+            "status": f"{board['condition']} - {issued_status}"
         })
     
     # Sort by serial number
