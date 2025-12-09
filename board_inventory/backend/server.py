@@ -144,7 +144,7 @@ class Board(BaseModel):
     category_id: str
     serial_number: str
     location: str = "In stock"  # In stock, Issued for machine, Repairing, Issued for spares, At customer site
-    condition: str = "New"  # New, Repaired, Repairing, Scrap
+    condition: str = "OK"  # OK, Needs repair, Scrap
     issued_by: Optional[str] = None
     issued_to: Optional[str] = None
     qc_by: Optional[str] = None
@@ -159,7 +159,7 @@ class BoardCreate(BaseModel):
     category_id: str
     serial_number: str
     location: str = "In stock"
-    condition: str = "New"
+    condition: str = "OK"
     qc_by: Optional[str] = None
     comments: Optional[str] = None
 
@@ -549,8 +549,10 @@ async def create_issue_request(request_data: IssueRequestCreate, current_user: U
         board = await db.boards.find_one({
             "category_id": request_data.category_id,
             "serial_number": request_data.serial_number,
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "$or": [
+                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                {"location": "Repairing", "condition": "Repaired"}
+            ]
         })
         if not board:
             raise HTTPException(status_code=400, detail="Board not available or not found")
@@ -582,8 +584,8 @@ async def create_bulk_issue_request(bulk_request: BulkIssueRequestCreate, curren
         # Check available boards count
         available_count = await db.boards.count_documents({
             "category_id": category_request.category_id,
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "location": "In stock",
+            "condition": {"$in": ["New", "Repaired"]}
         })
         
         # Validate quantity
@@ -688,11 +690,11 @@ async def preview_auto_select_boards(request: dict, current_user: User = Depends
     if not category_id or quantity <= 0:
         raise HTTPException(status_code=400, detail="Category ID and quantity required")
     
-    # Get available boards (not issued and in good condition)
+    # Get available boards
     available_boards = await db.boards.find({
         "category_id": category_id,
-        "condition": {"$in": ["New", "Repaired"]},
-        "issued_to": None  # Not issued to anyone
+        "location": "In stock",
+        "condition": "New"
     }).to_list(None)
     
     if len(available_boards) < quantity:
@@ -783,56 +785,6 @@ async def delete_bulk_issue_request(request_id: str, current_user: User = Depend
     
     return {"message": "Bulk request deleted successfully"}
 
-class BoardAssignmentUpdate(BaseModel):
-    boards: List[BoardRequest]
-    status: str = "approved"
-
-@api_router.put("/bulk-issue-requests/{request_id}/assign-boards")
-async def assign_boards_to_bulk_request(
-    request_id: str, 
-    assignment: BoardAssignmentUpdate,
-    current_user: User = Depends(get_current_user)
-):
-    """Assign specific boards to a bulk request and approve it"""
-    if current_user.role != "admin":
-        raise HTTPException(status_code=403, detail="Only admins can assign boards and approve requests")
-    
-    # Find the bulk request
-    request_doc = await db.bulk_issue_requests.find_one({"id": request_id})
-    if not request_doc:
-        raise HTTPException(status_code=404, detail="Bulk issue request not found")
-    
-    # Validate all boards are available
-    for board_request in assignment.boards:
-        if board_request.serial_number:
-            board = await db.boards.find_one({
-                "category_id": board_request.category_id,
-                "serial_number": board_request.serial_number,
-                "condition": {"$in": ["New", "Repaired"]},
-                "issued_to": None  # Not issued to anyone
-            })
-            if not board:
-                raise HTTPException(
-                    status_code=400, 
-                    detail=f"Board {board_request.serial_number} is not available"
-                )
-    
-    # Update the bulk request with assigned boards and approved status
-    update_dict = {
-        "boards": [br.dict() for br in assignment.boards],
-        "status": assignment.status,
-        "approved_by": current_user.email,
-        "approved_date": datetime.now(timezone.utc).isoformat()
-    }
-    
-    await db.bulk_issue_requests.update_one(
-        {"id": request_id},
-        {"$set": update_dict}
-    )
-    
-    updated_request = await db.bulk_issue_requests.find_one({"id": request_id})
-    return BulkIssueRequest(**updated_request)
-
 class OutwardRequest(BaseModel):
     request_id: Optional[str] = None
     board_id: Optional[str] = None
@@ -868,8 +820,10 @@ async def issue_board(
                             query = {
                                 "category_id": board_request["category_id"],
                                 "serial_number": board_request["serial_number"],
-                                "condition": {"$in": ["New", "Repaired"]},
-                                "issued_to": None  # Not issued to anyone
+                                "$or": [
+                                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                                    {"location": "Repairing", "condition": "Repaired"}
+                                ]
                             }
                             
                             board = await db.boards.find_one(query)
@@ -878,6 +832,7 @@ async def issue_board(
                                 await db.boards.update_one(
                                     {"id": board["id"]},
                                     {"$set": {
+                                        "location": "Issued for machine",
                                         "issued_by": outward_data.issued_by_override or current_user.email,
                                         "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
                                         "project_number": bulk_request_doc["project_number"],
@@ -895,8 +850,10 @@ async def issue_board(
                             # Find available boards for this category
                             available_boards = await db.boards.find({
                                 "category_id": board_request["category_id"],
-                                "condition": {"$in": ["New", "Repaired"]},
-                                "issued_to": None  # Not issued to anyone
+                                "$or": [
+                                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                                    {"location": "Repairing", "condition": "Repaired"}
+                                ]
                             }).to_list(quantity)
                             
                             if len(available_boards) < quantity:
@@ -908,6 +865,7 @@ async def issue_board(
                                 await db.boards.update_one(
                                     {"id": board["id"]},
                                     {"$set": {
+                                        "location": "Issued for machine",
                                         "issued_by": outward_data.issued_by_override or current_user.email,
                                         "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
                                         "project_number": bulk_request_doc["project_number"],
@@ -953,11 +911,13 @@ async def issue_board(
         if request_doc["status"] != "approved":
             raise HTTPException(status_code=400, detail="Individual request not approved")
         
-        # Find available board (not issued and in good condition)
+        # Find available board (New/Repaired boards that are In stock OR Repaired boards that are being repaired)
         query = {
-            "category_id": request_doc["category_id"],
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "category_id": request_doc["category_id"], 
+            "$or": [
+                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                {"location": "Repairing", "condition": "Repaired"}
+            ]
         }
         if request_doc.get("serial_number"):
             query["serial_number"] = request_doc["serial_number"]
@@ -970,6 +930,7 @@ async def issue_board(
         await db.boards.update_one(
             {"id": board["id"]},
             {"$set": {
+                "location": "Issued for machine",
                 "issued_by": outward_data.issued_by_override or current_user.email,
                 "issued_to": outward_data.issued_to_override or request_doc["issued_to"],
                 "project_number": request_doc["project_number"],
@@ -987,11 +948,13 @@ async def issue_board(
         return {"message": "Board issued successfully", "serial_number": board["serial_number"]}
     
     elif outward_data.board_id and outward_data.issued_to:
-        # Direct board issue (not issued and in good condition)
+        # Direct board issue (New/Repaired boards that are In stock OR Repaired boards that are being repaired)
         board = await db.boards.find_one({
             "id": outward_data.board_id,
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "$or": [
+                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                {"location": "Repairing", "condition": "Repaired"}
+            ]
         })
         if not board:
             raise HTTPException(status_code=400, detail="Board not available")
@@ -999,6 +962,7 @@ async def issue_board(
         await db.boards.update_one(
             {"id": outward_data.board_id},
             {"$set": {
+                "location": "Issued for machine",
                 "issued_by": outward_data.issued_by_override or current_user.email,
                 "issued_to": outward_data.issued_to_override or outward_data.issued_to,
                 "project_number": outward_data.project_number or "",
@@ -1130,11 +1094,13 @@ async def get_low_stock_report(current_user: User = Depends(get_current_user)):
     low_stock_report = []
     
     for category in categories:
-        # Count current stock (available boards)
+        # Count current stock (In stock + Repairing with condition Repaired)
         current_stock = await db.boards.count_documents({
             "category_id": category["id"],
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "$or": [
+                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                {"location": "Repairing", "condition": "Repaired"}
+            ]
         })
         
         min_stock = category.get("minimum_stock_quantity", 0)
@@ -1159,9 +1125,12 @@ async def get_under_repair_report(current_user: User = Depends(get_current_user)
     if not check_permission(current_user, "view_reports"):
         raise HTTPException(status_code=403, detail="Permission denied: view_reports required")
     
-    # Find all boards with condition "Repairing" (still being repaired)
+    # Find all boards with condition "Under repair" or location "Repairing" with condition not "Repaired"
     under_repair_boards = await db.boards.find({
-        "condition": "Repairing"
+        "$or": [
+            {"condition": "Under repair"},
+            {"location": "Repairing", "condition": {"$ne": "Repaired"}}
+        ]
     }).to_list(1000)
     
     # Get category information for each board
@@ -1177,6 +1146,7 @@ async def get_under_repair_report(current_user: User = Depends(get_current_user)
             "manufacturer": category.get("manufacturer", "Unknown"),
             "version": category.get("version", "Unknown"),
             "condition": board["condition"],
+            "location": board["location"],
             "inward_date": board.get("inward_date_time", ""),
             "comments": board.get("comments", "")
         })
@@ -1247,7 +1217,7 @@ async def get_serial_history(serial_number: str, current_user: User = Depends(ge
         "version": category["version"] if category else "Unknown",
         "current_status": {
             "condition": board["condition"],
-            "issued": board.get("issued_to") is not None,
+            "location": board["location"],
             "issued_to": board.get("issued_to", ""),
             "issued_by": board.get("issued_by", ""),
             "project_number": board.get("project_number", ""),
@@ -1278,11 +1248,11 @@ async def get_serial_numbers_by_category(category_id: str, current_user: User = 
     
     serial_numbers = []
     for board in boards:
-        issued_status = "Issued" if board.get("issued_to") else "Available"
         serial_numbers.append({
             "serial_number": board["serial_number"],
             "condition": board["condition"],
-            "status": f"{board['condition']} - {issued_status}"
+            "location": board["location"],
+            "status": f"{board['condition']} - {board['location']}"
         })
     
     # Sort by serial number
@@ -1360,9 +1330,9 @@ async def get_category_export_data(category_id: str, current_user: User = Depend
         "bulk_issue_requests": clean_bulk_requests,
         "statistics": {
             "total_boards": len(boards),
-            "available": len([b for b in boards if not b.get("issued_to")]),
-            "issued": len([b for b in boards if b.get("issued_to")]),
-            "repairing": len([b for b in boards if b["condition"] == "Repairing"]),
+            "in_stock": len([b for b in boards if b["location"] == "In stock"]),
+            "issued": len([b for b in boards if b["location"] == "Issued for machine"]),
+            "repairing": len([b for b in boards if b["location"] == "Repairing"]),
             "total_requests": len(issue_requests),
             "total_bulk_requests": len(bulk_requests)
         }
@@ -1384,8 +1354,10 @@ async def export_low_stock_excel(current_user: User = Depends(get_current_user_f
     for category in categories:
         current_stock = await db.boards.count_documents({
             "category_id": category["id"],
-            "condition": {"$in": ["New", "Repaired"]},
-            "issued_to": None  # Not issued to anyone
+            "$or": [
+                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
+                {"location": "Repairing", "condition": "Repaired"}
+            ]
         })
         
         min_stock = category.get("minimum_stock_quantity", 0)
@@ -1692,17 +1664,16 @@ async def export_category_excel(category_id: str, current_user: User = Depends(g
     # Sheet 2: All Boards
     ws2 = wb.create_sheet("All Boards")
     if boards:
-        headers = ["Serial Number", "Condition", "Status", "Issued To", "Issued By", "Project Number", "Issue Date", "Inward Date", "Comments"]
+        headers = ["Serial Number", "Condition", "Location", "Issued To", "Issued By", "Project Number", "Issue Date", "Inward Date", "Comments"]
         for col, header in enumerate(headers, 1):
             cell = ws2.cell(row=1, column=col, value=header)
             cell.font = Font(bold=True)
             cell.fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
         
         for row, board in enumerate(boards, 2):
-            issued_status = "Issued" if board.get("issued_to") else "Available"
             ws2.cell(row=row, column=1, value=board.get("serial_number", ""))
             ws2.cell(row=row, column=2, value=board.get("condition", ""))
-            ws2.cell(row=row, column=3, value=issued_status)
+            ws2.cell(row=row, column=3, value=board.get("location", ""))
             ws2.cell(row=row, column=4, value=board.get("issued_to", ""))
             ws2.cell(row=row, column=5, value=board.get("issued_by", ""))
             ws2.cell(row=row, column=6, value=board.get("project_number", ""))
@@ -1793,23 +1764,21 @@ async def get_dashboard_stats(current_user: User = Depends(get_current_user)):
         raise HTTPException(status_code=403, detail="Permission denied: view_dashboard required")
     total_categories = await db.categories.count_documents({})
     total_boards = await db.boards.count_documents({})
-    available = await db.boards.count_documents({
-        "condition": {"$in": ["New", "Repaired"]},
-        "issued_to": None  # Not issued to anyone
+    in_stock = await db.boards.count_documents({
+        "location": "In stock", 
+        "condition": {"$in": ["New", "Repaired"]}
     })
-    issued = await db.boards.count_documents({"issued_to": {"$ne": None}})
+    issued = await db.boards.count_documents({"location": {"$ne": "In stock"}})
     repaired = await db.boards.count_documents({"condition": "Repaired"})
-    repairing = await db.boards.count_documents({"condition": "Repairing"})
     scrap = await db.boards.count_documents({"condition": "Scrap"})
     pending_requests = await db.issue_requests.count_documents({"status": "pending"})
     
     return {
         "total_categories": total_categories,
         "total_boards": total_boards,
-        "available": available,
+        "in_stock": in_stock,
         "issued": issued,
         "repaired": repaired,
-        "repairing": repairing,
         "scrap": scrap,
         "pending_requests": pending_requests
     }
