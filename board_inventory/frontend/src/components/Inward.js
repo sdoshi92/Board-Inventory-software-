@@ -395,7 +395,7 @@ const Inward = ({ user, onLogout }) => {
                       <MapPin className="h-4 w-4 mr-1" />
                       Location
                     </span>
-                    <Badge className={`text-xs ${getLocationBadge(board.location)}`}>
+                    <Badge className="text-xs bg-gray-100 text-gray-800">
                       {board.location}
                     </Badge>
                   </div>
