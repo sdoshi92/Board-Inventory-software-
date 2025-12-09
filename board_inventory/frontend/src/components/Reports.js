@@ -480,11 +480,7 @@ const Reports = ({ user, onLogout }) => {
                           <div className="space-y-1 text-sm">
                             <div className="flex justify-between">
                               <span className="text-gray-600">Condition:</span>
-                              <Badge variant="outline">{serialHistory.current_status.condition}</Badge>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-600">Location:</span>
-                              <Badge variant="secondary">{serialHistory.current_status.location}</Badge>
+                              <Badge variant="secondary">{serialHistory.current_status.condition}</Badge>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-600">Issued To:</span>
