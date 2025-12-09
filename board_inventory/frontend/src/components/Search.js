@@ -27,7 +27,6 @@ const Search = ({ user, onLogout }) => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [locationFilter, setLocationFilter] = useState('all');
   const [conditionFilter, setConditionFilter] = useState('all');
   const [searchResults, setSearchResults] = useState([]);
   const [categories, setCategories] = useState([]);
