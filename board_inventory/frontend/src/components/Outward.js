@@ -61,8 +61,7 @@ const Outward = ({ user, onLogout }) => {
       const bulkApproved = bulkRequestsRes.data.filter(req => req.status === 'approved');
       setApprovedRequests([...individualApproved, ...bulkApproved]);
       setAvailableBoards(boardsRes.data.filter(board => 
-        (board.location === 'In stock' && (board.condition === 'New' || board.condition === 'Repaired')) ||
-        (board.location === 'Repairing' && board.condition === 'Repaired')
+        !board.issued_to && (board.condition === 'New' || board.condition === 'Repaired')
       ));
       setCategories(categoriesRes.data);
       setUsers(usersRes.data.filter(user => user.is_active));
