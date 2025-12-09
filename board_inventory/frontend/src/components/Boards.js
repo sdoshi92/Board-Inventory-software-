@@ -35,7 +35,6 @@ const Boards = ({ user, onLogout }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBoard, setEditingBoard] = useState(null);
   const [filterCategory, setFilterCategory] = useState('all');
-  const [filterLocation, setFilterLocation] = useState('all');
   const [filterCondition, setFilterCondition] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
