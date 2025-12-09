@@ -164,23 +164,6 @@ const Search = ({ user, onLogout }) => {
               </div>
               
               <div>
-                <Label>Location</Label>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
-                  <SelectTrigger data-testid="search-location-filter">
-                    <SelectValue placeholder="All locations" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All locations</SelectItem>
-                    {locations.map((location) => (
-                      <SelectItem key={location} value={location}>
-                        {location}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
                 <Label>Condition</Label>
                 <Select value={conditionFilter} onValueChange={setConditionFilter}>
                   <SelectTrigger data-testid="search-condition-filter">
