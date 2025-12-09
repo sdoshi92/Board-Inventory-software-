@@ -349,7 +349,6 @@ const Reports = ({ user, onLogout }) => {
                           <td className="border border-gray-300 px-3 py-2 text-sm">
                             <Badge variant="outline" className="bg-orange-100 text-orange-800">{board.condition}</Badge>
                           </td>
-                          <td className="border border-gray-300 px-3 py-2 text-sm">{board.location}</td>
                           <td className="border border-gray-300 px-3 py-2 text-sm">{board.inward_date}</td>
                         </tr>
                       ))}
