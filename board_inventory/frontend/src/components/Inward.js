@@ -890,7 +890,7 @@ const Inward = ({ user, onLogout }) => {
                               <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
                                 {board.condition}
                               </Badge>
-                              <Badge className={`text-xs ${getLocationBadge(board.location)}`}>
+                              <Badge className="text-xs bg-gray-100 text-gray-800">
                                 {board.location}
                               </Badge>
                             </div>
