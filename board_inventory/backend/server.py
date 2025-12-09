@@ -890,10 +890,8 @@ async def issue_board(
                             # Find available boards for this category
                             available_boards = await db.boards.find({
                                 "category_id": board_request["category_id"],
-                                "$or": [
-                                    {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                                    {"location": "Repairing", "condition": "Repaired"}
-                                ]
+                                "condition": {"$in": ["New", "Repaired"]},
+                                "issued_to": None  # Not issued to anyone
                             }).to_list(quantity)
                             
                             if len(available_boards) < quantity:
@@ -905,7 +903,6 @@ async def issue_board(
                                 await db.boards.update_one(
                                     {"id": board["id"]},
                                     {"$set": {
-                                        "location": "Issued for machine",
                                         "issued_by": outward_data.issued_by_override or current_user.email,
                                         "issued_to": outward_data.issued_to_override or bulk_request_doc["issued_to"],
                                         "project_number": bulk_request_doc["project_number"],
