@@ -46,14 +46,6 @@ const Boards = ({ user, onLogout }) => {
     picture: null
   });
 
-  const locations = [
-    'In stock',
-    'Issued for machine',
-    'Repairing',
-    'Issued for spares',
-    'At customer site'
-  ];
-
   const conditions = ['New', 'Repaired', 'Scrap'];
 
   useEffect(() => {
