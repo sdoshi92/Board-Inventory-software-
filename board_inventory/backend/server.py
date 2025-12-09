@@ -1379,10 +1379,8 @@ async def export_low_stock_excel(current_user: User = Depends(get_current_user_f
     for category in categories:
         current_stock = await db.boards.count_documents({
             "category_id": category["id"],
-            "$or": [
-                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                {"location": "Repairing", "condition": "Repaired"}
-            ]
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         })
         
         min_stock = category.get("minimum_stock_quantity", 0)
