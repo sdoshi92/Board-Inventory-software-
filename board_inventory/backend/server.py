@@ -509,7 +509,6 @@ async def delete_board(board_id: str, current_user: User = Depends(get_current_u
 async def search_boards(
     query: Optional[str] = None,
     category_id: Optional[str] = None,
-    location: Optional[str] = None,
     condition: Optional[str] = None,
     current_user: User = Depends(get_current_user)
 ):
@@ -517,8 +516,6 @@ async def search_boards(
     
     if category_id:
         filter_conditions["category_id"] = category_id
-    if location:
-        filter_conditions["location"] = location
     if condition:
         filter_conditions["condition"] = condition
     
