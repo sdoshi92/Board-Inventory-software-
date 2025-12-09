@@ -164,6 +164,7 @@ class BoardCreate(BaseModel):
     comments: Optional[str] = None
 
 class BoardUpdate(BaseModel):
+    location: Optional[str] = None
     condition: Optional[str] = None
     issued_by: Optional[str] = None
     issued_to: Optional[str] = None
