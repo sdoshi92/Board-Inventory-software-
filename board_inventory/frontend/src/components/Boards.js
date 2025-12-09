@@ -148,11 +148,7 @@ const Boards = ({ user, onLogout }) => {
         });
         toast.success('Board updated successfully');
       } else {
-        // For new boards, always set location to "In stock"
-        const boardData = {
-          ...formData,
-          location: 'In stock'
-        };
+        const boardData = { ...formData };
         delete boardData.picture; // Handle picture upload separately if needed
         await axios.post(`${API}/boards`, boardData);
         toast.success('Board created successfully');
