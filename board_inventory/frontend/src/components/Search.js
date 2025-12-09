@@ -250,9 +250,6 @@ const Search = ({ user, onLogout }) => {
                                 </p>
                               </div>
                               <div className="flex space-x-2">
-                                <Badge className={`text-xs ${getLocationBadge(board.location)}`}>
-                                  {board.location}
-                                </Badge>
                                 <Badge className={`text-xs ${getStatusBadge(board.condition)}`}>
                                   {board.condition}
                                 </Badge>
