@@ -337,7 +337,6 @@ const Reports = ({ user, onLogout }) => {
                         <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Category</th>
                         <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Manufacturer</th>
                         <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Condition</th>
-                        <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Location</th>
                         <th className="border border-gray-300 px-3 py-2 text-left text-xs font-semibold">Inward Date</th>
                       </tr>
                     </thead>
