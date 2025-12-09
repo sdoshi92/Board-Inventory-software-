@@ -1242,7 +1242,7 @@ async def get_serial_history(serial_number: str, current_user: User = Depends(ge
         "version": category["version"] if category else "Unknown",
         "current_status": {
             "condition": board["condition"],
-            "location": board["location"],
+            "issued": board.get("issued_to") is not None,
             "issued_to": board.get("issued_to", ""),
             "issued_by": board.get("issued_by", ""),
             "project_number": board.get("project_number", ""),
