@@ -483,9 +483,10 @@ async def update_board(board_id: str, board_data: BoardUpdate, current_user: Use
     update_data = {k: v for k, v in board_data.dict().items() if v is not None}
     
     # If issuing the board, set issued_date_time
-    if update_data.get("location") and update_data["location"] != "In stock":
+    if update_data.get("issued_to"):
         update_data["issued_date_time"] = datetime.now(timezone.utc)
-        update_data["issued_by"] = current_user.email
+        if not update_data.get("issued_by"):
+            update_data["issued_by"] = current_user.email
     
     await db.boards.update_one(
         {"id": board_id},
