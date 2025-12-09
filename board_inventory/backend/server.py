@@ -579,8 +579,8 @@ async def create_bulk_issue_request(bulk_request: BulkIssueRequestCreate, curren
         # Check available boards count
         available_count = await db.boards.count_documents({
             "category_id": category_request.category_id,
-            "location": "In stock",
-            "condition": {"$in": ["New", "Repaired"]}
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         })
         
         # Validate quantity
