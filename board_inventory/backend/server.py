@@ -967,7 +967,6 @@ async def issue_board(
         await db.boards.update_one(
             {"id": board["id"]},
             {"$set": {
-                "location": "Issued for machine",
                 "issued_by": outward_data.issued_by_override or current_user.email,
                 "issued_to": outward_data.issued_to_override or request_doc["issued_to"],
                 "project_number": request_doc["project_number"],
