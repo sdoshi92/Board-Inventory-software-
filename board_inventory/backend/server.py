@@ -948,13 +948,11 @@ async def issue_board(
         if request_doc["status"] != "approved":
             raise HTTPException(status_code=400, detail="Individual request not approved")
         
-        # Find available board (New/Repaired boards that are In stock OR Repaired boards that are being repaired)
+        # Find available board (not issued and in good condition)
         query = {
-            "category_id": request_doc["category_id"], 
-            "$or": [
-                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                {"location": "Repairing", "condition": "Repaired"}
-            ]
+            "category_id": request_doc["category_id"],
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         }
         if request_doc.get("serial_number"):
             query["serial_number"] = request_doc["serial_number"]
