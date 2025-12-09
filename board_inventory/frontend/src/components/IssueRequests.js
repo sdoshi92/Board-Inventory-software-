@@ -224,18 +224,13 @@ const IssueRequests = ({ user, onLogout }) => {
   const getAvailableBoards = (categoryId) => {
     if (!categoryId) return [];
     return boards.filter(board => {
-      // Exclude scrap boards
+      // Exclude scrap boards and already issued boards
       if (board.condition === 'Scrap') return false;
+      if (board.issued_to) return false;  // Already issued
       
-      // Include boards that are:
-      // 1. In stock with New or Repaired condition
-      // 2. In Repairing location with Repaired condition (repaired and ready)
-      const isInStock = board.location === 'In stock' && 
-                        (board.condition === 'New' || board.condition === 'Repaired');
-      const isRepairedAndReady = board.location === 'Repairing' && 
-                                 board.condition === 'Repaired';
-      
-      return board.category_id === categoryId && (isInStock || isRepairedAndReady);
+      // Include boards with New or Repaired condition that are not issued
+      return board.category_id === categoryId && 
+             (board.condition === 'New' || board.condition === 'Repaired');
     });
   };
 
