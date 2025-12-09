@@ -1687,16 +1687,17 @@ async def export_category_excel(category_id: str, current_user: User = Depends(g
     # Sheet 2: All Boards
     ws2 = wb.create_sheet("All Boards")
     if boards:
-        headers = ["Serial Number", "Condition", "Location", "Issued To", "Issued By", "Project Number", "Issue Date", "Inward Date", "Comments"]
+        headers = ["Serial Number", "Condition", "Status", "Issued To", "Issued By", "Project Number", "Issue Date", "Inward Date", "Comments"]
         for col, header in enumerate(headers, 1):
             cell = ws2.cell(row=1, column=col, value=header)
             cell.font = Font(bold=True)
             cell.fill = PatternFill(start_color="CCCCCC", end_color="CCCCCC", fill_type="solid")
         
         for row, board in enumerate(boards, 2):
+            issued_status = "Issued" if board.get("issued_to") else "Available"
             ws2.cell(row=row, column=1, value=board.get("serial_number", ""))
             ws2.cell(row=row, column=2, value=board.get("condition", ""))
-            ws2.cell(row=row, column=3, value=board.get("location", ""))
+            ws2.cell(row=row, column=3, value=issued_status)
             ws2.cell(row=row, column=4, value=board.get("issued_to", ""))
             ws2.cell(row=row, column=5, value=board.get("issued_by", ""))
             ws2.cell(row=row, column=6, value=board.get("project_number", ""))
