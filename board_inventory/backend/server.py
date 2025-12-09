@@ -544,10 +544,8 @@ async def create_issue_request(request_data: IssueRequestCreate, current_user: U
         board = await db.boards.find_one({
             "category_id": request_data.category_id,
             "serial_number": request_data.serial_number,
-            "$or": [
-                {"location": "In stock", "condition": {"$in": ["New", "Repaired"]}},
-                {"location": "Repairing", "condition": "Repaired"}
-            ]
+            "condition": {"$in": ["New", "Repaired"]},
+            "issued_to": None  # Not issued to anyone
         })
         if not board:
             raise HTTPException(status_code=400, detail="Board not available or not found")
